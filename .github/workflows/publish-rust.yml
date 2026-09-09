@@ -2,7 +2,7 @@ name: Publish package to crates.io
 
 on:
   push:
-    tags-ignore: ["*-with-generated-files"]
+    tags-ignore: ["*-with-generated-files", "v*-semantifold.*"]
 
 concurrency:
   group: ${{github.workflow}}-${{github.ref}}
