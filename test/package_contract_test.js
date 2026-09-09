@@ -7,6 +7,25 @@ const root = path.join(__dirname, "..");
 const packageJson = require(path.join(root, "package.json"));
 const packageLock = require(path.join(root, "package-lock.json"));
 const readme = fs.readFileSync(path.join(root, "README.md"), "utf8");
+const workflowPaths = [
+  "generate-static-grammar.yml",
+  "publish-rust.yml",
+  "release.yml",
+];
+const workflows = Object.fromEntries(
+  workflowPaths.map((file) => [
+    file,
+    fs.readFileSync(path.join(root, ".github", "workflows", file), "utf8"),
+  ])
+);
+
+function pushTrigger(workflow) {
+  const match = workflow.match(
+    /(?:^|\n)(on:\n  push:\n[\s\S]*?)(?=\n\n(?:concurrency:|jobs:))/
+  );
+  assert.ok(match);
+  return match[1];
+}
 
 describe("npm package contract", () => {
   it("builds from checked-in sources without the tree-sitter CLI", () => {
@@ -59,5 +78,18 @@ describe("npm package contract", () => {
         relativePath
       );
     }
+  });
+
+  it("excludes Semantifold source tags from inherited release workflows", () => {
+    assert.deepEqual(Object.keys(workflows), workflowPaths);
+    assert.equal(
+      pushTrigger(workflows["generate-static-grammar.yml"]),
+      'on:\n  push:\n    tags:\n      - "*"\n      - "!v*-semantifold.*"'
+    );
+
+    const releaseTrigger =
+      'on:\n  push:\n    tags-ignore: ["*-with-generated-files", "v*-semantifold.*"]';
+    assert.equal(pushTrigger(workflows["publish-rust.yml"]), releaseTrigger);
+    assert.equal(pushTrigger(workflows["release.yml"]), releaseTrigger);
   });
 });
