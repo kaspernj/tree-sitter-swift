@@ -10,7 +10,7 @@ This contains a [`tree-sitter`](https://tree-sitter.github.io/tree-sitter) gramm
 ## Semantifold fork
 
 The `semantifold/install-safe-0.7.1` branch is maintained in the
-Kasper-owned fork for Semantifold's direct Git dependency. It starts at the
+Kasper-owned fork for Semantifold's direct source dependency. It starts at the
 exact `tree-sitter-swift@0.7.1` npm provenance commit
 `88bfd19a89be9d0481b14566fb6160cccea2fe0a` and preserves that package name,
 version, license, generated parser, scanner, queries, and Node binding.
@@ -20,12 +20,12 @@ the native binding from the checked-in generated sources, the package does not
 install or invoke `tree-sitter-cli`, and its Node peer is the tested
 `tree-sitter@0.25.1` line. The fork owns this installation compatibility layer;
 grammar and parser changes continue to come from reviewed upstream sources.
-Generated sources must remain checked in so a fresh Git dependency install does
+Generated sources must remain checked in so a fresh source-package install does
 not download or regenerate parser artifacts.
 
-The immutable consumer tag `v0.7.1-semantifold.1` will be created only after
-this change is reviewed and merged. Until then, this branch is a candidate and
-must not be consumed through a moving branch reference.
+The tag `v0.7.1-semantifold.1` will be created only after this change is
+reviewed and merged. It is the human provenance marker for that full merged
+commit, not the npm dependency reference.
 
 ## Getting started
 
@@ -54,11 +54,15 @@ let tree = parser.parse(&my_source_code, None)
 
 ### Javascript
 
-To use this from NPM, you'll add similar dependencies to `package.json`:
+To install this fork with npm, pin the full 40-character merged commit SHA in
+the HTTPS source archive URL. npm canonicalizes hosted Git dependency URLs,
+including `git+https`, to SSH, so do not use a hosted Git URL, moving branch, or
+tag-only dependency. Replace `<40-character-commit-sha>` below with the commit
+marked by `v0.7.1-semantifold.1`:
 
 ```
 "dependencies: {
-  "tree-sitter-swift": "git+https://github.com/kaspernj/tree-sitter-swift.git#v0.7.1-semantifold.1",
+  "tree-sitter-swift": "https://github.com/kaspernj/tree-sitter-swift/archive/<40-character-commit-sha>.tar.gz",
   "tree-sitter": "^0.25.1"
 }
 ```

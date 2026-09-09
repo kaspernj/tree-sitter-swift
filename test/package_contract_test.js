@@ -6,6 +6,7 @@ const { describe, it } = require("node:test");
 const root = path.join(__dirname, "..");
 const packageJson = require(path.join(root, "package.json"));
 const packageLock = require(path.join(root, "package-lock.json"));
+const readme = fs.readFileSync(path.join(root, "README.md"), "utf8");
 
 describe("npm package contract", () => {
   it("builds from checked-in sources without the tree-sitter CLI", () => {
@@ -30,6 +31,18 @@ describe("npm package contract", () => {
     assert.equal(packageLock.version, packageJson.version);
     assert.equal(packageLock.packages[""].version, packageJson.version);
     assert.equal(packageJson.peerDependencies["tree-sitter"], "^0.25.1");
+
+    const documentedDependency = readme.match(
+      /"tree-sitter-swift": "([^"]+)"/
+    )?.[1];
+    assert.equal(
+      documentedDependency,
+      "https://github.com/kaspernj/tree-sitter-swift/archive/<40-character-commit-sha>.tar.gz"
+    );
+    assert.doesNotMatch(
+      readme,
+      /"tree-sitter-swift": "git\+https:\/\/github\.com\//
+    );
 
     for (const relativePath of [
       "binding.gyp",
